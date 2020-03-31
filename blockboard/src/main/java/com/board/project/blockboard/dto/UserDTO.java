@@ -1,50 +1,58 @@
+/**
+ * @author Woohyeok Jun <woohyeok.jun@worksmobile.com>
+ * @file UserDTO.java
+ */
 package com.board.project.blockboard.dto;
 
+import javax.servlet.http.HttpServletRequest;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@ToString
 public class UserDTO {
-    private String user_id;
-    private int com_id;
-    private String user_pwd;
 
-    public String getUser_pwd() {
-        return user_pwd;
-    }
+  private String userId;
+  private int companyId;
+  private String companyName;
+  private String userName;
+  private String userPassword;
+  private String userType;
+  private String imageUrl;
+  private String imageFileName;
+  private String thumbnailUrl;
+  private String thumbnailFileName;
 
-    public void setUser_pwd(String user_pwd) {
-        this.user_pwd = user_pwd;
-    }
+  public UserDTO(String userId, int companyId, String userName,
+      String userType) {
+    this.userId = userId;
+    this.companyId = companyId;
+    this.userName = userName;
+    this.userType = userType;
+  }
 
-    private String user_type;
+  public UserDTO(HttpServletRequest request) {
+    this.userId = request.getAttribute("userId").toString();
+    this.userName = request.getAttribute("userName").toString();
+    this.userType = request.getAttribute("userType").toString();
+    this.companyId = Integer.parseInt(request.getAttribute("companyId").toString());
+  }
 
-    public UserDTO(String user_id) {
-        this.user_id = user_id;
-    }
-    public String getUser_id() {
-        return user_id;
-    }
+  public UserDTO(String userId, int companyId) {
+    this.userId = userId;
+    this.companyId = companyId;
+  }
 
-    public void setUser_id(String user_id) {
-        this.user_id = user_id;
-    }
-
-    public int getCom_id() {
-        return com_id;
-    }
-
-    public void setCom_id(int com_id) {
-        this.com_id = com_id;
-    }
-
-    public String getUser_type() {
-        return user_type;
-    }
-
-    public void setUser_type(String user_type) {
-        this.user_type = user_type;
-    }
-
-
-    @Override
-    public String toString() {
-        return "UserDTO [User_ID=" + user_id + ", Company_ID=" + com_id + ", User_Type=" + user_type;
-    }
+  public UserDTO(String userId, String imageUrl, String imageFileName, String thumbnailUrl,
+      String thumbnailFileName) {
+    this.userId = userId;
+    this.imageUrl = imageUrl;
+    this.imageFileName = imageFileName;
+    this.thumbnailUrl = thumbnailUrl;
+    this.thumbnailFileName = thumbnailFileName;
+  }
 }

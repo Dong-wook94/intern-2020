@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ * @author Dongwook Kim <dongwook.kim1211@worksmobile.com>
+ * @file FunctionMapper.xml
+-->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.board.project.blockboard.mapper.FunctionMapper">
+
+  <select id="selectFunctionCheckByCompanyId" parameterType="int"
+    resultType="com.board.project.blockboard.dto.FunctionDTO">
+    SELECT FUNCTION.function_id                              AS functionId,
+           IF(ISNULL(functioncheck.company_id), FALSE, TRUE) AS functionOn,
+           FUNCTION.function_name                            AS functionName,
+           functioncheck.function_data                       AS functionData
+    FROM functions FUNCTION
+           LEFT OUTER JOIN functions_check functioncheck
+                           ON FUNCTION.function_id = functioncheck.function_id
+                             AND functioncheck.company_id = #{companyId};
+  </select>
+
+  <select id="selectFunctionCheckByCompanyIdAndFunctionId" parameterType="hashmap"
+    resultType="boolean">
+    SELECT IF(Count(function_id) > 0, TRUE, FALSE)
+    FROM functions_check
+    WHERE company_id = #{companyId}
+      AND function_id = #{functionId};
+  </select>
+
+  <insert id="insertFunctionCheckData" parameterType="hashmap">
+    INSERT INTO functions_check
+    VALUES (#{companyId},
+            #{functionId},
+            NULL);
+  </insert>
+
+  <delete id="deleteFunctionCheckData" parameterType="hashmap">
+    DELETE
+    FROM functions_check
+    WHERE company_id = #{companyId}
+      AND function_id = #{functionId};
+  </delete>
+</mapper>

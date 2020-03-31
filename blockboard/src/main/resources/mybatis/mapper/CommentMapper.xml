@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ * @author Dongwook Kim <dongwook.kim1211@worksmobile.com>
+ * @file CommentMapper.xml
+-->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.board.project.blockboard.mapper.CommentMapper">
+  <select id="selectCommentsByPostId" parameterType="int"
+    resultType="com.board.project.blockboard.dto.CommentDTO">
+    SELECT comments.comment_id                      AS commentId,
+           comments.post_id                         AS postId,
+           comments.user_id                         AS userId,
+           users.user_name                          AS userName,
+           users.thumbnail_url                      AS thumbnailUrl,
+           comments.company_id                      AS companyId,
+           comments.comment_content                 AS commentContent,
+           comments.comment_content_unescape_html   AS commentContentUnescapeHtml,
+           comments.comment_register_time           AS commentRegisterTime,
+           comments.comment_referenced_id           AS commentReferencedId,
+           comments.replies_count                   AS repliesCount
+    FROM comments comments
+           LEFT OUTER JOIN users users
+                           ON comments.user_id = users.user_id
+    WHERE comments.post_id = #{postId}
+      AND comments.comment_referenced_id IS NULL
+    ORDER BY commentRegisterTime DESC
+    LIMIT #{startIndex},#{pageSize};
+  </select>
+
+  <select id="getAllCommentsCountByPostId" parameterType="int" resultType="int">
+    SELECT Count(comment_id)
+    FROM comments
+    WHERE post_id = #{postId};
+  </select>
+
+  <select id="getOnlyCommentsCountByPostId" parameterType="int" resultType="int">
+    SELECT Count(comment_id)
+    FROM comments
+    WHERE post_id = #{postId}
+      AND comment_referenced_id IS NULL;
+  </select>
+
+  <select id="selectUserIdByCommentId" parameterType="int" resultType="string">
+    SELECT user_id
+    FROM comments
+    WHERE comment_id = #{commentId};
+  </select>
+
+  <insert id="insertNewCommentByCommentInfo" parameterType="hashmap">
+    INSERT INTO comments
+    (post_id,
+     user_id,
+     company_id,
+     comment_content,
+     comment_content_unescape_html,
+     comment_referenced_id)
+    VALUES (#{postId},
+            #{userId},
+            #{companyId},
+            #{commentContent},
+            #{commentContentUnescapeHtml},
+            NULL);
+    <selectKey keyProperty="commentId" resultType="int" order="AFTER">
+      <if test='commentId != 0'>
+        SELECT #{commentId};
+      </if>
+      <if test='commentId == 0'>
+        SELECT LAST_INSERT_ID();
+      </if>
+    </selectKey>
+  </insert>
+
+  <delete id="deleteCommentByCommentReferencedId" parameterType="int">
+    DELETE
+    FROM comments
+    WHERE comment_referenced_id = #{commentId};
+  </delete>
+
+  <delete id="deleteCommentByCommentId" parameterType="int">
+    DELETE
+    FROM comments
+    WHERE comment_id = #{commentId};
+  </delete>
+
+  <delete id="deleteCommentsByPostId" parameterType="int">
+    DELETE
+    FROM comments
+    WHERE post_id = #{postId};
+  </delete>
+
+  <update id="updateComment" parameterType="com.board.project.blockboard.dto.CommentDTO">
+    UPDATE comments
+    SET comment_content = #{commentContent},
+        comment_content_unescape_html = #{commentContentUnescapeHtml}
+    WHERE comment_id = #{commentId};
+  </update>
+
+  <update id="updateRepliesCountPlus1" parameterType="int">
+    UPDATE comments
+    SET replies_count = replies_count + 1
+    WHERE comment_id = #{commentReferencedId};
+  </update>
+  <update id="updateRepliesCountMinus1" parameterType="int">
+    UPDATE comments
+    SET replies_count = replies_count - 1
+    WHERE comment_id = #{commentReferencedId};
+  </update>
+
+  <select id="selectCommentReferencedIdByCommentId" parameterType="int" resultType="int">
+    SELECT comment_referenced_id
+    FROM comments
+    WHERE comment_id = #{commentId};
+  </select>
+
+  <select id="selectRepliesCountByCommentReferencedId" parameterType="int" resultType="int">
+    SELECT replies_count
+    FROM comments
+    WHERE comment_id = #{commentReferencedId};
+  </select>
+
+  <select id="selectCommentByCommentId" parameterType="int"
+    resultType="com.board.project.blockboard.dto.CommentDTO">
+    SELECT comments.comment_id                      AS commentId,
+           comments.post_id                         AS postId,
+           comments.user_id                         AS userId,
+           users.user_name                          AS userName,
+           users.user_id                            AS userId,
+           comments.company_id                      AS companyId,
+           comments.comment_content                 AS commentContent,
+           comments.comment_content_unescape_html   AS commentContentUnescapeHtml,
+           comments.comment_register_time           AS commentRegisterTime,
+           comments.comment_referenced_id           AS commentReferencedId
+    FROM comments
+           JOIN users ON comments.user_id = users.user_id
+    WHERE comments.comment_id = #{commentId};
+  </select>
+  <select id="selectCommentByCommentIdForCheckExisted" parameterType="int" resultType="com.board.project.blockboard.dto.CommentDTO">
+    SELECT comment_id AS commentId
+    FROM comments
+    WHERE comment_id = #{commentId};
+  </select>
+</mapper>
